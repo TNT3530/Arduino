@@ -1,10 +1,15 @@
+#include <LiquidCrystal.h>
 #include <DallasTemperature.h>
 #include <OneWire.h>
 
 #define ONEWIRE 7
 #define aref_voltage 3.3
 
-OneWire ds(1);
+#define DS18S20_ID 0x10
+#define DS18B20_ID 0x28
+ 
+OneWire ds(10);
+LiquidCrystal lcd(7, 11, 5, 4, 3, 2);
 
 int led1 = 13;
 int led2 = 12;
@@ -14,7 +19,9 @@ void setup(void) {
   // put your setup code here, to run once:
   Serial.print("Booting...");
   pinMode(led1, OUTPUT);
-  pinMode(led2, OUTPUT);   
+  pinMode(led2, OUTPUT);  
+  lcd.begin(16, 2);
+  lcd.print("Fuck this");
   Serial.begin(115200);
 }
   
@@ -23,24 +30,26 @@ void setup(void) {
   int reading = analogRead(0);
   float voltage = reading * 5.0;
   voltage /= 1024;
-  
+  lcd.setCursor(0, 1);
+  lcd.print(millis()/1000);
   Serial.print(voltage);
-  //Serial.print(" Volts     ");
+  Serial.print(" Volts     ");
   
-  //float temperatureC = (voltage - 0.5) * 100;
-  //Serial.print(temperatureC);
-  //Serial.print(" *C     ");
+  float temperatureC = (voltage - 0.5) * 100;
+  Serial.print(temperatureC);
+  Serial.print(" *C     ");
   
-  //float temperatureF = (temperatureC * (9.0/5.0)) + 32;
-  //Serial.print(temperatureF);
-  //Serial.print(" *F     ");
+  float temperatureF = (temperatureC * (9.0/5.0)) + 32;
+  Serial.print(temperatureF);
+  Serial.print(" *F     ");
   
-  float change = 0;//temperatureF - previous;
+  float change = temperatureF - previous;
   
-  float temp = getTemp();
-  Serial.println(temp);
+  float temp1 = (getTemp() * (9/5)) + 32;
+  Serial.print(temp1 + 10);
+  Serial.print(" *F (Waterproof)");
   
-  Serial.println(change);
+  Serial.println("");
   
   if(change > 0)
   {
@@ -52,9 +61,13 @@ void setup(void) {
     digitalWrite(led2, HIGH);
     digitalWrite(led1, LOW);
   }
-
+  if(change == 0)
+  {
+    digitalWrite(led1, LOW);
+    digitalWrite(led2, LOW);
+  }
   
-  //previous = temperatureF;
+  previous = temperatureF;
   
   delay(1000);
   //delay(500);
@@ -90,14 +103,23 @@ float getTemp()
   
   ds.reset();
   ds.select(addr);
+  ds.write(0x44, 1);
+  
+  byte present = ds.reset();
+  ds.select(addr);
   ds.write(0xBE);
   
   for (int i = 0; i < 9; i++)
   {
     data[i] = ds.read();
+    //Serial.println(data[i]);
   }
- 
-  unsigned int TRead = (data[1] << 8) | data[0];
+  ds.reset_search();
+  
+  byte MSB = data[1];
+  byte LSB = data[0];
+  
+  float TRead = ((MSB << 8) | LSB);
   float Temperature = TRead / 16;
   return Temperature;
 }
