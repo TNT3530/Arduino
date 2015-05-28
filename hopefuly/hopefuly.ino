@@ -21,7 +21,7 @@ void setup(void) {
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);  
   lcd.begin(16, 2);
-  lcd.print("Fuck this");
+  lcd.print("init...");
   Serial.begin(115200);
 }
   
@@ -31,7 +31,7 @@ void setup(void) {
   float voltage = reading * 5.0;
   voltage /= 1024;
   lcd.setCursor(0, 1);
-  lcd.print(millis()/1000);
+  //lcd.print(millis()/1000);
   Serial.print(voltage);
   Serial.print(" Volts     ");
   
@@ -48,6 +48,8 @@ void setup(void) {
   float temp1 = (getTemp() * (9/5)) + 32;
   Serial.print(temp1 + 10);
   Serial.print(" *F (Waterproof)");
+  
+  lcd.print(temp1+10);
   
   Serial.println("");
   
