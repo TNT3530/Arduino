@@ -21,7 +21,7 @@ void setup(void) {
   pinMode(led1, OUTPUT);
   pinMode(led2, OUTPUT);  
   lcd.begin(16, 2);
-  lcd.print("init...");
+  lcd.print("Welcome");
   Serial.begin(115200);
 }
   
@@ -30,7 +30,7 @@ void setup(void) {
   int reading = analogRead(0);
   float voltage = reading * 5.0;
   voltage /= 1024;
-  lcd.setCursor(0, 1);
+  lcd.setCursor(0, 0);
   //lcd.print(millis()/1000);
   Serial.print(voltage);
   Serial.print(" Volts     ");
@@ -50,6 +50,13 @@ void setup(void) {
   Serial.print(" *F (Waterproof)");
   
   lcd.print(temp1+10);
+  lcd.setCursor(5, 0);
+  lcd.print(" *F Water");
+  lcd.setCursor(0, 1);
+  lcd.print(temperatureF);
+  lcd.setCursor(5, 1);
+  lcd.print(" *F Room");
+  lcd.setCursor(0,0);
   
   Serial.println("");
   
